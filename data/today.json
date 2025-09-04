@@ -1,8 +1,0 @@
-{
-  "date": "2025-09-04",
-  "draws": [
-    { "slot": "Morning", "time": "1:00 PM", "name": "Dear Morning", "number": "12A 34567" },
-    { "slot": "Afternoon", "time": "4:00 PM", "name": "Dear Day", "number": "89B 01234" },
-    { "slot": "Evening", "time": "8:00 PM", "name": "Dear Evening", "number": "56C 78901" }
-  ]
-}
