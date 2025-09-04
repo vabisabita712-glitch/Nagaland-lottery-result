@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results Archive - Nagaland Lottery Results</title>
+  <meta name="description" content="Browse the archive of past Nagaland State Lottery results.">
+  <script src="https://cdn.tailwindcss.com/3.4.4"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <header class="bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-6 flex justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-blue-800">
+        <a href="/">Nagaland Lottery Results</a>
+      </h1>
+      <nav>
+        <a href="/" class="px-4 py-2 rounded-lg hover:bg-gray-100 text-base md:text-lg font-medium">Home</a>
+        <a href="/archive.html" class="px-4 py-2 rounded-lg hover:bg-gray-100 text-base md:text-lg font-medium">Archive</a>
+        <a href="/contact.html" class="px-4 py-2 rounded-lg hover:bg-gray-100 text-base md:text-lg font-medium">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-6">
+    <section class="text-center mb-8">
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900">Results Archive</h2>
+      <p class="text-base md:text-lg text-gray-600 mt-1">Browse past lottery results by date.</p>
+    </section>
+
+    <section id="archive-list">
+      <!-- JS will populate this -->
+      <div class="text-center py-8">Loading archive...</div>
+    </section>
+  </main>
+
+  <footer class="max-w-2xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+    <p>&copy; 2025 Nagaland Lottery Results. All rights reserved.</p>
+    <p class="mt-1">This is not an official website. Please verify results with official sources.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const archiveList = document.getElementById('archive-list');
+
+      fetch('/data/archive.json')
+        .then(response => response.json())
+        .then(data => {
+          // Clear loading state
+          archiveList.innerHTML = '';
+
+          // Populate list
+          data.forEach(archiveItem => {
+            const date = new Date(archiveItem.date + 'T00:00:00');
+            const formattedDate = date.toLocaleDateString('en-US', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            const resultsHtml = archiveItem.results.map(result => `
+              <li class="flex justify-between items-center py-1">
+                <span>${result.name}</span>
+                <span class="font-semibold">${result.number}</span>
+              </li>
+            `).join('');
+
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl shadow-md p-4 mb-4';
+            card.innerHTML = `
+              <h3 class="text-xl font-bold text-gray-800 mb-2">${formattedDate}</h3>
+              <ul class="space-y-1 text-base md:text-lg">${resultsHtml}</ul>
+            `;
+            archiveList.appendChild(card);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching archive data:', error);
+          archiveList.innerHTML = '<div class="text-center py-8 text-red-500">Could not load archive. Please try again later.</div>';
+        });
+    });
+  </script>
+
+</body>
+</html>
