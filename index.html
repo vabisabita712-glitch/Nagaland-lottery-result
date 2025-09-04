@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nagaland Lottery Results - Today's Draw</title>
+  <meta name="description" content="Check the latest official Nagaland State Lottery results for the morning, day, and evening draws.">
+  <script src="https://cdn.tailwindcss.com/3.4.4"></script>
+  <style>
+    .result-number { letter-spacing: 0.1em; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <header class="bg-white shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-5 flex justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-bold text-blue-800">
+        <a href="/">Nagaland Lottery Results</a>
+      </h1>
+      <nav class="flex items-center space-x-2 md:space-x-4">
+        <a href="/" class="px-3 py-2 rounded-lg hover:bg-gray-100 text-base md:text-lg font-medium text-blue-700">Home</a>
+        <a href="/archive.html" class="px-3 py-2 rounded-lg hover:bg-gray-100 text-base md:text-lg font-medium">Archive</a>
+        <a href="/contact.html" class="px-3 py-2 rounded-lg hover:bg-gray-100 text-base md:text-lg font-medium">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <section class="text-center mb-8">
+      <h2 id="results-date" class="text-3xl md:text-4xl font-bold text-gray-900">Latest Results</h2>
+      <p id="results-date-formatted" class="text-base md:text-lg text-gray-600 mt-2">Loading date...</p>
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-lg p-4 md:p-6">
+      <div id="results-container" class="space-y-4">
+        <!-- JS will populate this -->
+        <div class="text-center py-10">Loading results...</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="max-w-4xl mx-auto px-4 py-8 text-center text-gray-500 text-sm">
+    <p>&copy; 2025 Nagaland Lottery Results. All rights reserved.</p>
+    <p class="mt-1">This is an unofficial website. Please verify all results with official sources.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const resultsContainer = document.getElementById('results-container');
+      const resultsDateFormatted = document.getElementById('results-date-formatted');
+
+      fetch('/data/archive.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(archive => {
+          if (!archive || archive.length === 0) {
+            throw new Error('Archive data is empty or not found.');
+          }
+
+          // The most recent result is the first item in the archive
+          const latestResult = archive[0];
+
+          // Clear loading state
+          resultsContainer.innerHTML = '';
+
+          // Update date heading
+          const date = new Date(latestResult.date + 'T00:00:00');
+          resultsDateFormatted.textContent = date.toLocaleDateString('en-US', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+          });
+
+          // Populate results
+          if (latestResult.draws && latestResult.draws.length > 0) {
+            latestResult.draws.forEach(draw => {
+              const drawElement = document.createElement('div');
+              drawElement.className = 'p-4 border rounded-lg flex justify-between items-center bg-gray-50';
+              drawElement.innerHTML = `
+                <div>
+                  <p class="text-lg font-bold text-blue-700">${draw.time} Draw</p>
+                  <p class="text-sm text-gray-600">${draw.name}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl md:text-3xl font-bold text-red-600 result-number">${draw.number}</p>
+                </div>
+              `;
+              resultsContainer.appendChild(drawElement);
+            });
+          } else {
+             resultsContainer.innerHTML = '<div class="text-center py-10">No draws found for the latest date.</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching lottery data:', error);
+          resultsContainer.innerHTML = `<div class="text-center py-10 text-red-500">Could not load results. The archive file might be empty or missing. Error: ${error.message}</div>`;
+          resultsDateFormatted.textContent = 'Could not load data.';
+        });
+    });
+  </script>
+
+</body>
+</html>
