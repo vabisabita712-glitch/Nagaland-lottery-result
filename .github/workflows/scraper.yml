@@ -1,0 +1,55 @@
+name: Nagaland Lottery Scraper
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Note: GitHub Actions cron jobs run on UTC time.
+    # 1:00 PM IST is 7:30 UTC. We run at 8:00 UTC.
+    - cron: '0 8 * * *'
+    # 6:00 PM IST is 12:30 UTC. We run at 13:00 UTC.
+    - cron: '0 13 * * *'
+    # 8:00 PM IST is 14:30 UTC. We run at 15:00 UTC.
+    - cron: '0 15 * * *'
+
+jobs:
+  scrape-lottery-results:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Determine which draw to run
+        id: draw_time
+        run: |
+          # Determine the draw based on the UTC hour the job is run
+          hour=$(date -u +'%H')
+          if (( hour >= 8 && hour < 13 )); then
+            echo "draw=morning" >> $GITHUB_OUTPUT
+          elif (( hour >= 13 && hour < 15 )); then
+            echo "draw=day" >> $GITHUB_OUTPUT
+          else
+            echo "draw=evening" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run scraper script
+        run: python lottery_scraper.py ${{ steps.draw_time.outputs.draw }}
+
+      - name: Commit and push if data changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Update lottery results for ${{ steps.draw_time.outputs.draw }} draw'
+          file_pattern: 'data/archive.json'
+          commit_user_name: 'GitHub Actions Bot'
+          commit_user_email: 'actions-bot@github.com'
+          commit_author: 'GitHub Actions Bot <actions-bot@github.com>'
